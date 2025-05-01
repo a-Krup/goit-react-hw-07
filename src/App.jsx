@@ -1,44 +1,29 @@
-import React from "react";
-import { useDispatch, useSelector } from "react-redux";
-import ContactForm from "./components/ContactForm/ContactForm";
-import SearchBox from "./components/SearchBox/SearchBox";
-import ContactList from "./components/ContactList/ContactList";
-import {
-  addContact,
-  deleteContact,
-  selectContacts,
-} from "./redux/contactsSlice";
-import { selectNameFilter, changeFilter } from "./redux/filtersSlice";
-import "./App.css";
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import ContactForm from './components/ContactForm/ContactForm';
+import SearchBox from './components/SearchBox/SearchBox';
+import ContactList from './components/ContactList/ContactList';
+import { fetchContacts } from './redux/contactsOps';
+import { selectLoading, selectError } from './redux/contactsSlice';
+import './App.css';
 
 const App = () => {
   const dispatch = useDispatch();
+  const loading = useSelector(selectLoading);
+  const error = useSelector(selectError);
 
-  const contacts = useSelector(selectContacts);
-  const filter = useSelector(selectNameFilter);
-
-  const filteredContacts = contacts.filter((contact) =>
-    contact.name.toLowerCase().includes(filter.toLowerCase())
-  );
-
-  const handleAddContact = (name, number) => {
-    dispatch(addContact({ name, number }));
-  };
-
-  const handleDeleteContact = (id) => {
-    dispatch(deleteContact(id));
-  };
-
-  const handleChangeFilter = (filter) => {
-    dispatch(changeFilter(filter));
-  };
+  useEffect(() => {
+    dispatch(fetchContacts());
+  }, [dispatch]);
 
   return (
     <div>
       <h1>Phonebook</h1>
-      <ContactForm onAddContact={handleAddContact} />
-      <SearchBox searchTerm={filter} setSearchTerm={handleChangeFilter} />
-      <ContactList contacts={filteredContacts} onDelete={handleDeleteContact} />
+      <ContactForm />
+      <SearchBox />
+      {loading && <p>Loading contacts...</p>}
+      {error && <p>Error: {error}</p>}
+      <ContactList />
     </div>
   );
 };
